@@ -51,32 +51,32 @@ driver = webdriver.Chrome(
 )
 driver.get("https://bams.vba.vic.gov.au/bams/s/practitioner-search")  # example URL
 wait = WebDriverWait(driver, 5)
+reg_input = driver.execute_script("""
+function findInput(root) {
+    if (!root) return null;
+
+    const input = root.querySelector('input[name="registrationNumber"]');
+    if (input) return input;
+
+    const elements = root.querySelectorAll('*');
+    for (const el of elements) {
+        if (el.shadowRoot) {
+            const found = findInput(el.shadowRoot);
+            if (found) return found;
+        }
+    }
+    return null;
+}
+return findInput(document);
+""")
+time.sleep(5)
+
+if not reg_input:
+    raise Exception("Registration input not found")
 
 i=0
 while (i<10):
     print(f"Processing row {i}")
-    reg_input = driver.execute_script("""
-    function findInput(root) {
-        if (!root) return null;
-
-        const input = root.querySelector('input[name="registrationNumber"]');
-        if (input) return input;
-
-        const elements = root.querySelectorAll('*');
-        for (const el of elements) {
-            if (el.shadowRoot) {
-                const found = findInput(el.shadowRoot);
-                if (found) return found;
-            }
-        }
-        return null;
-    }
-    return findInput(document);
-    """)
-
-    if not reg_input:
-        raise Exception("Registration input not found")
-
 
     reg_input.click()
     reg_input.clear()
