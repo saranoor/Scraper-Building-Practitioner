@@ -1,5 +1,7 @@
 # Building Practitioner Scraper
 
+![Project thumbnail](assets/thumbnail.png)
+
 Scrapes practitioner data from the Victorian Building Authority (VBA) BAMS site and enriches it with details for a subset of accreditation IDs pulled from the public `BPR.csv` dataset.
 
 ## What it does
