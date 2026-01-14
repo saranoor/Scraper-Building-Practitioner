@@ -55,6 +55,10 @@ The script currently:
 - You may need to adjust waits/timeouts based on network speed.
 - Consider switching to headless mode or expanding ID selection once the flow is stable.
 
+## Challenges
+- Shadow DOM access: solved using `pyshadow` in `scrape_practitioner_details.py`.
+- Fast Scraping: Using Multithreading (in progress to speed up scraping).
+
 ## Files
 - `scrape_building_practitioners.py`: main workflow for searching and collecting data.
 - `scrape_practitioner_details.py`: pulls address and contact details from a practitioner detail page.
