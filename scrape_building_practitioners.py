@@ -52,7 +52,7 @@ driver = webdriver.Chrome(
 driver.get("https://bams.vba.vic.gov.au/bams/s/practitioner-search")  # example URL
 wait = WebDriverWait(driver, 5)
 
-i=5
+i=0
 while (i<10):
     print(f"Processing row {i}")
     reg_input = driver.execute_script("""
@@ -80,14 +80,14 @@ while (i<10):
 
     reg_input.click()
     reg_input.clear()
-    print(f"Searching for {df.loc[i,"Accreditation ID"]}")
+    # print(f"Searching for {df.loc[i,"Accreditation ID"]}")
     reg_input.send_keys(df.loc[i,"Accreditation ID"])
     reg_input.click()
     reg_input.send_keys(Keys.ENTER)
 
     driver.find_element(By.XPATH, "//button[text()='Search']").click()
 
-    time.sleep(5)  # allow Salesforce to render results
+    time.sleep(3)  # allow Salesforce to render results
 
     shadow = Shadow(driver)
 
@@ -98,25 +98,33 @@ while (i<10):
         print(f"Practitioner found: {name}")
         print(f"Practitioner link: {link}")
     except:
-        print("No practitioner found")
+        # print("No practitioner found")
         name, link = "N/A", "N/A"
 
     # 2. Get Phone (using the unique class from your HTML)
     try:
         phone = shadow.find_element("span.phone-value-style").text.strip()
-        print(f"Phone found: {phone}")
+        # print(f"Phone found: {phone}")
     except:
-        print("Phone not found")
+        # print("Phone not found")
         phone = "N/A"
 
-    driver.get(link)
+    # driver.get(link)
+    driver.execute_script(f"window.open('{link}', '_blank');")
+    search_page_handle = driver.current_window_handle
+    driver.switch_to.window(driver.window_handles[-1])
     shadow = Shadow(driver)
 
-    time.sleep(3)  # Wait for the page to load completely
-    all_labels = shadow.find_elements("label[c-practitionerdetail_practitionerdetail]")
+    # all_labels = shadow.find_elements("label[c-practitionerdetail_practitionerdetail]")
+    found = False
+    for attempt in range(10): # Try for 10 seconds total
+        all_labels = shadow.find_elements("label[c-practitionerdetail_practitionerdetail]")
+        if len(all_labels) > 0:
+            found = True
+            break
+        time.sleep(1)
 
     address = ""
-    phone = ""
 
     for label in all_labels:
         text = label.text.strip()
@@ -127,16 +135,17 @@ while (i<10):
             value_item = shadow.get_next_sibling_element(parent)
             address = value_item.text.strip().replace('\n', ', ')
 
-    print(f"Address: {address}")
-    print(f"Phone: {phone}")
+    # print(f"Address: {address}")
+    # print(f"Phone: {phone}")
     df.loc[i,"namae"] = name
     df.loc[i,"contact details"] = phone
     df.loc[i,"business details"] = address
 
     i+=1
-    driver.back()
-    print("Going back to search page")
-    time.sleep(20)
+    driver.close()
+    driver.switch_to.window(driver.window_handles[0])
 
 print(df.head(10))
 time.sleep(20)
+
+df.to_csv("BPR_enriched.csv", index=False)
