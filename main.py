@@ -35,4 +35,4 @@ if __name__ == "__main__":
     out_path="BPR.csv"
     csv_url = download_bpr_csv()
     print(f"Downloaded BPR CSV from {csv_url}") 
-    enrich_bpr_data(out_path)
+    enrich_bpr_data(out_path, n_rows=1000)
